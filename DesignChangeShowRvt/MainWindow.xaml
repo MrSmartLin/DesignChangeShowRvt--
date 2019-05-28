@@ -1,0 +1,76 @@
+﻿<Window x:Class="DesignChangeShowRvt.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DesignChangeShowRvt"
+        mc:Ignorable="d"
+        Title="编辑模式" Height="361" Width="564" Loaded="Window_Loaded" WindowStartupLocation="Manual" Left="1200" Top="300" Closed="Window_Closed">
+    <Grid>
+        <Grid Margin="0,0,0,40" >
+            <Grid.RowDefinitions >
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="40"></ColumnDefinition>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="40"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label Name="lblDate" Content="日期：" Grid.Row="0" Grid.Column="0"></Label>
+            <Label Name="lblMajor" Content="专业：" Grid.Row="0" Grid.Column="3"></Label>
+            <Label Name="lblNum" Content="编号：" Grid.Row="1" Grid.Column="0"></Label>
+            <Label Name="lblUnit" Content="建设单位：" Grid.Row="1" Grid.Column="3"></Label>
+            <Label Name="lblChangeCost" Content="变更金额：" Grid.Row="2" Grid.Column="0"></Label>
+            <Label Name="lblChangeDate" Content="变更日期：" Grid.Row="2" Grid.Column="3"></Label>
+            <Label Name="lblChangeContent" Content="变更内容：" Grid.Row="3" Grid.Column="0"></Label>
+            <Label Name="lblSelectEles" Content="Rvt拾取元素：" Grid.Row="3" Grid.Column="3"></Label>
+            <DatePicker Name="pickDateCreate" Grid.Row="0" Grid.Column="2" Width="32" CalendarClosed="pickDateCreate_CalendarClosed"></DatePicker>
+            <DatePicker Name="pickDateChange" Grid.Row="2" Grid.Column="5" Width="32" CalendarClosed="pickDateChange_CalendarClosed"></DatePicker>
+
+            <ComboBox Name="cbxDate" Grid.Row="0" Grid.Column="1" IsEditable="True" SelectionChanged="cbxDate_SelectionChanged"></ComboBox>
+            <ComboBox Name="txtMajor" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" SelectionChanged="txtMajor_SelectionChanged">
+                <ComboBoxItem Content="建筑"></ComboBoxItem>
+                <ComboBoxItem Content="结构"></ComboBoxItem>
+                <ComboBoxItem Content="机电"></ComboBoxItem>
+            </ComboBox>
+            <ComboBox Name="txtNum" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" IsEditable="True" SelectionChanged="txtNum_SelectionChanged"></ComboBox>
+            <TextBox Name="txtUnit" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"></TextBox>
+            <TextBox Name="txtChangeCost" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"></TextBox>
+            <TextBox Name="txtChangeDate" Grid.Row="2" Grid.Column="4"></TextBox>
+            <TextBox Name="txtChangeContent" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"></TextBox>
+            <TextBox Name="txtMainSelectEles" Grid.Row="3" Grid.Column="4" IsReadOnly="True" Grid.ColumnSpan="2"></TextBox>
+            <CheckBox Name="CheckBoxSureAdd" HorizontalAlignment="Left" Margin="7,39,0,0" Grid.Row="3" VerticalAlignment="Top" Checked="CheckBoxSureAdd_Checked"/>
+        </Grid>
+
+        <Grid Height="70" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Button Name="btnSelectEles" Content="从Rvt拾取元素" Grid.Column="0" Grid.Row="1" Click="btnSelectEles_Click"></Button>
+            <Button Name="btnRead" Content="读取" Grid.Column="1" Grid.Row="1" Click="btnRead_Click"></Button>
+            <Button Name="btnSave" Content="保存" Grid.Column="2" Grid.Row="1" Click="btnSave_Click"></Button>
+            <Button Name="btnSaveAs" Content="另存为" Grid.Column="3" Grid.Row="1" Click="btnSaveAs_Click" ></Button>
+            <Button Name="btnCreateDateItem" Content="新建日期项" Grid.Column="0" Grid.Row="0" Click="btnCreateItem_Click" ></Button>
+            <Button Name="btnCreateNumItem" Content="新建编号项" Grid.Column="1" Grid.Row="0" Click="btnCreateNumItem_Click"  ></Button>
+            <Button Name="btnDelNumItem" Content="删除编号项" Grid.Column="2" Grid.Row="0" Click="btnDelItem_Click" ></Button>
+            <Button Name="btnDelDateItem" Content="删除日期项" Grid.Column="3" Grid.Row="0" Click="btnDelDateItem_Click" />
+        </Grid>
+    </Grid>
+
+</Window>
