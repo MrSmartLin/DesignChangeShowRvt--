@@ -18,6 +18,7 @@ using System.Xml;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
+using Visibility = System.Windows.Visibility;
 
 namespace DesignChangeShowRvt
 {
@@ -39,8 +40,6 @@ namespace DesignChangeShowRvt
         //是否需要因CBX的选择更新数据
         private int forCbxUpdate = 1;
 
-
-
         //加载文档数据处理类
         private xmlData loadDoc = null;
         
@@ -52,7 +51,6 @@ namespace DesignChangeShowRvt
         {
             public int ID { get; set; }
             public string date { get; set; }
-
         }
 
         //加载到编号COMBOBOX的数据类
@@ -62,15 +60,22 @@ namespace DesignChangeShowRvt
             public string Num { get; set; }
         }
 
-
         //加载文件路径
         private string loadDocPath = null;
 
+
+        //就否需要添加日期、编号的节点
+        private int isNeedNodeDate = 0;
+        private int isNeedNodeNum = 0;
+        private int isNeedNodeOrders = 0;
 
 
         public MainWindow()
         {
             InitializeComponent();
+
+            //文本改动保存的复选框隐藏
+            CheckBoxSureAdd.Visibility = Visibility.Hidden;
         }
 
 
@@ -144,9 +149,9 @@ namespace DesignChangeShowRvt
         //新建日期项 按钮
         private void btnCreateItem_Click(object sender, RoutedEventArgs e)
         {
-            IsEditable = 1;
-            ControlEditable();
 
+            cbxDate.IsEnabled = true;
+            cbxDate.IsEditable = true;
 
             //若没有读取文档
             if (isLoadXmlDoc == 0)
@@ -162,7 +167,7 @@ namespace DesignChangeShowRvt
             else
             {
                 cbxDate.SelectedIndex=-1;
-                txtMajor.SelectedIndex = 0;
+                txtMajor.SelectedIndex = -1;
                 txtNum.SelectedIndex = -1;
                 txtUnit.Clear();
                 txtChangeCost.Clear();
@@ -170,34 +175,47 @@ namespace DesignChangeShowRvt
                 txtChangeContent.Clear();
                 txtMainSelectEles.Clear();
             }
-
-
-
+            
+            isNeedNodeDate = 1;
+            forCbxUpdate = 0;
         }
 
 
         //新建编号项 按钮
         private void btnCreateNumItem_Click(object sender, RoutedEventArgs e)
         {
-            forCbxUpdate = 0;           
-            if (isSelectDate == 0)
+
+            txtNum.IsEditable = true;
+
+            if (cbxDate.Text.Length==0&& txtMajor.Text.Length==0)
             {
                 TaskDialog taskDialog = new TaskDialog(Title = "错误");
-                taskDialog.MainContent = "请先选择日期....";
+                taskDialog.MainContent = "日期和专业必须有信息....";
                 taskDialog.Show();
             }
-            txtMajor.SelectedIndex = -1;
-            txtNum.SelectedIndex = -1;
-            txtUnit.Clear();
-            txtChangeCost.Clear();
-            txtChangeDate.Clear();
-            txtChangeContent.Clear();
-            txtMainSelectEles.Clear();
 
-            forCbxUpdate = 1;
+            else
+            {
+                forCbxUpdate = 0;
+
+                IsEditable = 1;
+                ControlEditable();
 
 
+                txtMajor.SelectedIndex = -1;
+                txtNum.SelectedIndex = -1;
+                txtUnit.Clear();
+                txtChangeCost.Clear();
+                txtChangeDate.Clear();
+                txtChangeContent.Clear();
+                txtMainSelectEles.Clear();
 
+                isNeedNodeNum = 1;
+
+                forCbxUpdate = 1;
+            }
+
+            forCbxUpdate = 0;
         }
 
 
@@ -284,42 +302,44 @@ namespace DesignChangeShowRvt
         //读取 按钮按读取键时，把数据加载进去
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
-            IsEditable = 1;
-            ControlEditable();
-
-            //清除原来窗口内加载数据
-            cbxDate.Items.Clear();
-            txtMajor.SelectedIndex = -1;
-            txtNum.Items.Clear();
-            txtUnit.Clear();
-            txtChangeCost.Clear();
-            txtChangeDate.Clear();
-            txtChangeContent.Clear();
-            txtMainSelectEles.Clear();
-            xmlData xmldata = new xmlData();
 
             //弹出读取路径窗口，加载路径
             OpenFileDialog openDia=new OpenFileDialog();
             openDia.Filter = "XML文件|*.xml";
             if (openDia.ShowDialog() == true)
             {
+                //清除原来窗口内加载数据
+                cbxDate.Items.Clear();
+                txtMajor.SelectedIndex = -1;
+                txtNum.Items.Clear();
+                txtUnit.Clear();
+                txtChangeCost.Clear();
+                txtChangeDate.Clear();
+                txtChangeContent.Clear();
+                txtMainSelectEles.Clear();
+                xmlData xmldata = new xmlData();
+
                 loadDocPath = openDia.FileName;
                 xmldata.xmlLoad(loadDocPath);
                 loadDoc = xmldata;
 
-                isLoadXmlDoc = 0;
+                //加载日期combobox
+                List<DateItem> DateItemList=new List<DateItem>();
+                for (int i=0;i<loadDoc.DCDates.Count;i++)
+                {
+                    DateItemList.Add(new DateItem {ID = i,date = loadDoc.DCDates.Item(i).Name});
+                }
+
+                cbxDate.ItemsSource = DateItemList;
+                cbxDate.DisplayMemberPath = "date";
+                cbxDate.SelectedValuePath = "ID";
+
+                cbxDate.IsEnabled = true;
+                pickDateCreate.IsEnabled = true;
             }
 
-            //加载日期combobox
-            List<DateItem> DateItemList=new List<DateItem>();
-            for (int i=0;i<loadDoc.DCDates.Count;i++)
-            {
-                DateItemList.Add(new DateItem {ID = i,date = loadDoc.DCDates.Item(i).Name});
-            }
 
-            cbxDate.ItemsSource = DateItemList;
-            cbxDate.DisplayMemberPath = "date";
-            cbxDate.SelectedValuePath = "ID";
+
 
             
         }
@@ -354,40 +374,23 @@ namespace DesignChangeShowRvt
 
         }
 
-        //checkbox 确定加入所填的内容
-        private void CheckBoxSureAdd_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         //选择了日期的CBX选项
         private void cbxDate_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
+            forCbxUpdate = 0;
+            txtNum.ItemsSource = null;
+            txtNum.Text = "";
+            txtUnit.Clear();
+            txtChangeCost.Clear();
+            txtChangeDate.Clear();
+            txtChangeContent.Clear();
+            txtMajor.SelectedIndex = -1;
+            forCbxUpdate = 1;
+
             //如果专业和日期cbx都选了选项，更新编号cbx选项
             isSelectDate = 1;
-            if (isSelectMajor == 1&& forCbxUpdate==1)
-            {
-                loadDoc.DateIndex = cbxDate.SelectedIndex;
-                loadDoc.NumIndex = txtMajor.SelectedIndex;
-
-
-
-                loadDoc.DCJs = loadDoc.DCDates[loadDoc.DateIndex].ChildNodes;
-                loadDoc.Orders = loadDoc.DCJs[loadDoc.NumIndex].ChildNodes;
-
-
-                List<NumItem> NumItemList = new List<NumItem>();
-
-                for (int i = 0; i < loadDoc.Orders.Count; i++)
-                {
-                    NumItemList.Add(new NumItem {ID=i,Num=loadDoc.Orders.Item(i).FirstChild.InnerText});
-                }
-
-
-                txtNum.ItemsSource = NumItemList;
-                txtNum.DisplayMemberPath = "Num";
-                txtNum.SelectedValuePath = "ID";
-            }
 
 
 
@@ -400,41 +403,224 @@ namespace DesignChangeShowRvt
 
             if (isSelectDate == 1 && forCbxUpdate == 1)
             {
+                
                 loadDoc.DateIndex = cbxDate.SelectedIndex;
                 loadDoc.NumIndex = txtMajor.SelectedIndex;
-
-
-
+                TaskDialog task = new TaskDialog("专业"+ txtMajor.SelectedIndex);
+                task.Show();
                 loadDoc.DCJs = loadDoc.DCDates[loadDoc.DateIndex].ChildNodes;
                 loadDoc.Orders = loadDoc.DCJs[loadDoc.NumIndex].ChildNodes;
 
 
-                List<NumItem> NumItemList = new List<NumItem>();
+                if (loadDoc.Orders.Count!=0)
+                {                  
+                    List<NumItem> NumItemList = new List<NumItem>();
 
-                for (int i = 0; i < loadDoc.Orders.Count; i++)
-                {
-                    NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders.Item(i).FirstChild.InnerText });
+                    for (int i = 0; i < loadDoc.Orders.Count; i++)
+                    {
+                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders.Item(i).FirstChild.InnerText });
+                    }
+
+
+                    txtNum.ItemsSource = NumItemList;
+                    txtNum.DisplayMemberPath = "Num";
+                    txtNum.SelectedValuePath = "ID";
+
                 }
 
-
-                txtNum.ItemsSource = NumItemList;
-                txtNum.DisplayMemberPath = "Num";
-                txtNum.SelectedValuePath = "ID";
+                //重置编号、单位、金额、变更日期、内容
+                txtNum.Text = "";
+                txtUnit.Clear();
+                txtChangeCost.Clear();
+                txtChangeDate.Clear();
+                txtChangeContent.Clear();
             }
         }
 
         //选择了编号的CBX选项
         private void txtNum_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (forCbxUpdate == 1)
+            if (forCbxUpdate == 1 && isNeedNodeOrders == 1)
             {
                 //加载单位、金额、日期和内容的文本数据
                 txtUnit.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[1].InnerText;
                 txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
                 txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
                 txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
+
+            }
+        }
+
+        //控件文本有改动时自动弹出checkbox
+        private void cbxDate_OnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {           
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+        }
+
+        private void txtNum_OnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+        }
+
+        private void txtUnit_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+            CheckBoxSureAdd.IsChecked = false;
+        }
+
+        private void txtChangeCost_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+            CheckBoxSureAdd.IsChecked = false;
+        }
+
+        private void txtChangeDate_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+            CheckBoxSureAdd.IsChecked = false;
+        }
+
+        private void txtChangeContent_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckBoxSureAdd.Visibility = Visibility.Visible;
+            CheckBoxSureAdd.IsChecked = false;
+        }
+
+
+        //checkbox 确定加入所填的内容
+        private void CheckBoxSureAdd_Checked(object sender, RoutedEventArgs e)
+        {
+            if (cbxDate.Text.Length == 0 || txtMajor.Text.Length == 0 || txtNum.Text.Length == 0)
+            {
+                TaskDialog taskDialog = new TaskDialog("缺少");
+                taskDialog.MainContent = "日期、专业、编号应该全部选择上。。。。";
+                taskDialog.Show();
             }
 
+            else
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Hidden;
+                
+                //同时添加日期和编号节点
+                if (isNeedNodeDate == 1 && isNeedNodeNum == 1)
+                {
+                    isNeedNodeDate = 0;
+                    isNeedNodeNum = 0;
+                
+
+                    
+
+                    XmlElement thisItemEle = loadDoc.doc.CreateElement(cbxDate.Text);
+                    TaskDialog task = new TaskDialog("添加日期编号");
+                    task.Show();
+                    loadDoc.DCDB.AppendChild(thisItemEle);
+
+                    XmlElement thisDCJZ = loadDoc.doc.CreateElement("DCJZ");
+                    XmlElement thisDCJG = loadDoc.doc.CreateElement("DCJG");
+                    XmlElement thisDCJD = loadDoc.doc.CreateElement("DCJD");
+
+                    thisItemEle.AppendChild(thisDCJZ);
+                    thisItemEle.AppendChild(thisDCJG);
+                    thisItemEle.AppendChild(thisDCJD);
+                    
+
+
+
+                    XmlElement orders = loadDoc.doc.CreateElement("Order");
+                    loadDoc.DCDB.ChildNodes[txtMajor.SelectedIndex].AppendChild(orders);
+                    XmlElement Num = loadDoc.doc.CreateElement("Num");
+                    XmlElement Unit = loadDoc.doc.CreateElement("Unit");
+                    XmlElement Cost = loadDoc.doc.CreateElement("Cost");
+                    XmlElement Date = loadDoc.doc.CreateElement("Date");
+                    XmlElement Content = loadDoc.doc.CreateElement("Content");
+
+                    
+                    Num.InnerText = txtNum.Text;
+                    Unit.InnerText = txtUnit.Text;
+                    Cost.InnerText = txtChangeCost.Text;
+                    Date.InnerText = txtChangeDate.Text;
+                    Content.InnerText = txtChangeContent.Text;
+
+                    orders.AppendChild(Num);
+                    orders.AppendChild(Unit);
+                    orders.AppendChild(Cost);
+                    orders.AppendChild(Date);
+                    orders.AppendChild(Content);
+
+                    //把日期设为不可编辑
+                    cbxDate.IsEditable = false;
+                    //把编号设为不可编辑
+                    txtNum.IsEditable = false;
+
+
+                }
+
+
+
+                //添加日期节点
+                else if (isNeedNodeDate == 1)
+                {
+                    isNeedNodeDate = 0;
+
+                    XmlElement thisItemEle = loadDoc.doc.CreateElement(cbxDate.Text);
+                    loadDoc.DCDB.AppendChild(thisItemEle);
+                    XmlElement thisDCJZ = loadDoc.doc.CreateElement("DCJZ");
+                    XmlElement thisDCJG = loadDoc.doc.CreateElement("DCJG");
+                    XmlElement thisDCJD = loadDoc.doc.CreateElement("DCJD");
+
+                    thisItemEle.AppendChild(thisDCJZ);
+                    thisItemEle.AppendChild(thisDCJG);
+                    thisItemEle.AppendChild(thisDCJD);
+
+                    IsEditable = 0;
+                    ControlEditable();
+
+                    //把日期设为不可编辑
+                    cbxDate.IsEditable = false;
+                }
+
+                //添加编号节点
+                else if (isNeedNodeNum == 1)
+                {
+                    isNeedNodeNum = 0;
+
+                    XmlElement orders = loadDoc.doc.CreateElement("Order");
+                    loadDoc.DCJs[txtMajor.SelectedIndex].AppendChild(orders);
+                    XmlElement Num = loadDoc.doc.CreateElement("Num");
+                    XmlElement Unit = loadDoc.doc.CreateElement("Unit");
+                    XmlElement Cost = loadDoc.doc.CreateElement("Cost");
+                    XmlElement Date = loadDoc.doc.CreateElement("Date");
+                    XmlElement Content = loadDoc.doc.CreateElement("Content");
+
+
+                    Num.InnerText = txtNum.Text;
+                    Unit.InnerText = txtUnit.Text;
+                    Cost.InnerText = txtChangeCost.Text;
+                    Date.InnerText = txtChangeDate.Text;
+                    Content.InnerText = txtChangeContent.Text;
+
+                    orders.AppendChild(Num);
+                    orders.AppendChild(Unit);
+                    orders.AppendChild(Cost);
+                    orders.AppendChild(Date);
+                    orders.AppendChild(Content);
+
+                    //把编号设为不可编辑
+                    txtNum.IsEditable = false;
+                }
+
+                //更新节点内容
+                else
+                {
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[0].InnerText = txtNum.Text;
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[1].InnerText = txtUnit.Text;
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[2].InnerText = txtChangeCost.Text;
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[3].InnerText = txtChangeDate.Text;
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[4].InnerText = txtChangeContent.Text;
+                }
+            }
+
+            CheckBoxSureAdd.IsChecked = false;
 
         }
     }
@@ -461,7 +647,7 @@ namespace DesignChangeShowRvt
 
         private List<string> dataItem;
 
-        private XmlDocument doc;
+        public XmlDocument doc;
 
         //读取XML文件
         public void xmlLoad(string filePath)
@@ -476,330 +662,6 @@ namespace DesignChangeShowRvt
 
             DCDates = DCDB.ChildNodes;
 
-        }
-
-
-        //选中数据时更新所有信息
-        public List<string> selectUpdateXml(int dateIndex,int majorIndex,int numIndex)
-        {
-            List<string> orderInfos = new List<string>();
-
-            this.DateIndex = dateIndex;
-            this.MajorIndex = majorIndex;
-            this.NumIndex = numIndex;
-
-            this.DCJs = DCDates[DateIndex].ChildNodes;
-
-            this.Orders = DCJs[MajorIndex].ChildNodes;
-
-            this.order = Orders[NumIndex].ChildNodes;
-
-            orderInfos.Add(order[0].InnerText);
-            orderInfos.Add(order[1].InnerText);
-            orderInfos.Add(order[2].InnerText);
-            orderInfos.Add(order[3].InnerText);
-            orderInfos.Add(order[4].InnerText);
-
-            return orderInfos;
-        }
-
-
-        //增加或更新节点
-        public void addItem(string date,int majorIndex,string num,string unit,string cost,string changeDate,string changeContent,string selectEleId)
-        {
-            int needCreateItem = 0;
-            int index = 0;
-            XmlElement thisItemEle = null;
-            XmlNode thisItemNode = null;
-
-            foreach (XmlNode item in DCDates)
-            {
-                if (item.Name == date)
-                {
-                    needCreateItem = 1;
-                    break;
-                }
-
-                index++;
-            }
-
-            if (needCreateItem != 0)
-            {
-                thisItemEle = doc.CreateElement(date);
-                DCDB.AppendChild(thisItemEle);
-                XmlElement thisDCJZ = doc.CreateElement("DCJZ");
-                XmlElement thisDCJG = doc.CreateElement("DCJG");
-                XmlElement thisDCJD = doc.CreateElement("DCJZD");
-
-                thisItemEle.AppendChild(thisDCJZ);
-                thisItemEle.AppendChild(thisDCJG);
-                thisItemEle.AppendChild(thisDCJD);
-
-                thisItemNode = DCDates.Item(DCDates.Count - 1);
-
-                switch (majorIndex)
-                {
-                    case 0:
-                    {
-                        XmlElement orders= doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        thisDCJZ.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-
-                        break;
-                    }
-                    case 1:
-                    {
-                        XmlElement orders = doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        thisDCJG.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-                        break;
-                    }
-                    case 2:
-                    {
-                        XmlElement orders = doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        thisDCJD.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-
-                        break;
-                    }
-                }
-
-
-            }
-            else
-            {
-                thisItemNode = DCDates.Item(index);
-                XmlNode Orders = null;
-
-                switch (majorIndex)
-                {
-                    case 0:
-                       
-                    {
-                        Orders = thisItemNode.ChildNodes[0];
-
-                        XmlElement orders = doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        Orders.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-
-                        break;
-
-                     }
-                    case 1:
-                    {
-                        Orders = thisItemNode.ChildNodes[1];
-
-                        XmlElement orders = doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        Orders.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-
-                        break;
-                    }
-
-                    case 2:
-                    {
-                        Orders = thisItemNode.ChildNodes[2];
-
-                        XmlElement orders = doc.CreateElement("Order");
-                        orders.SetAttribute("Num", num);
-                        Orders.AppendChild(orders);
-                        XmlElement Unit = doc.CreateElement("Unit");
-                        XmlElement Cost = doc.CreateElement("Cost");
-                        XmlElement Date = doc.CreateElement("Date");
-                        XmlElement Content = doc.CreateElement("Content");
-                        XmlElement ElementIds = doc.CreateElement("ElementIds");
-
-                        Unit.InnerText = unit;
-                        Cost.InnerText = cost;
-                        Date.InnerText = changeDate;
-                        Content.InnerText = changeContent;
-                        ElementIds.InnerText = selectEleId;
-
-                        orders.AppendChild(Unit);
-                        orders.AppendChild(Cost);
-                        orders.AppendChild(Date);
-                        orders.AppendChild(Content);
-                        orders.AppendChild(ElementIds);
-
-                        break;
-                     }                        
-                }
-            }
-        }
-
-
-        //删除当前编号项的节点
-        public void delNumItem(string date, int majorIndex, string num)
-        {
-            
-            int index = 0;
-            XmlNode thisItemNode = null;
-
-            foreach (XmlNode item in DCDates)
-            {
-                if (item.Name == date)
-                {
-                    break;
-                }
-                index++;
-            }
-
-            thisItemNode = DCDates.Item(index);
-            XmlNode Orders = null;
-
-            switch (majorIndex)
-            {
-                case 0:
-                {
-                    Orders = thisItemNode.ChildNodes[0];
-                    break;
-                }
-                case 1:
-                {
-                    Orders = thisItemNode.ChildNodes[1];
-                    break;
-                }
-                case 2:
-                {
-                    Orders = thisItemNode.ChildNodes[2];
-                    break;
-                }
-            }
-
-            foreach (XmlNode node in Orders.ChildNodes)
-            {
-                if (node.Attributes["Num"].Value == num)
-                {
-                    Orders.RemoveChild(node);
-                    break;
-                }
-            }
-        }
-
-        //删除当前日期项的节点
-        public void delDateItem(string date, int majorIndex)
-        {
-
-            int index = 0;
-            XmlNode thisItemNode = null;
-
-            foreach (XmlNode item in DCDates)
-            {
-                if (item.Name == date)
-                {
-                    break;
-                }
-                index++;
-            }
-
-            thisItemNode = DCDates.Item(index);
-            XmlNode Orders = null;
-
-            switch (majorIndex)
-            {
-                case 0:
-                {
-                    Orders = thisItemNode.ChildNodes[0];
-                    break;
-                }
-                case 1:
-                {
-                    Orders = thisItemNode.ChildNodes[1];
-                    break;
-                }
-                case 2:
-                {
-                    Orders = thisItemNode.ChildNodes[2];
-                    break;
-                }
-            }
-
-            thisItemNode.RemoveChild(Orders);
         }
 
         //保存文件

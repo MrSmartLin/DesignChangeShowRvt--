@@ -34,19 +34,19 @@
             <DatePicker Name="pickDateCreate" Grid.Row="0" Grid.Column="2" Width="32" CalendarClosed="pickDateCreate_CalendarClosed"></DatePicker>
             <DatePicker Name="pickDateChange" Grid.Row="2" Grid.Column="5" Width="32" CalendarClosed="pickDateChange_CalendarClosed"></DatePicker>
 
-            <ComboBox Name="cbxDate" Grid.Row="0" Grid.Column="1" IsEditable="True" SelectionChanged="cbxDate_SelectionChanged"></ComboBox>
-            <ComboBox Name="txtMajor" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" SelectionChanged="txtMajor_SelectionChanged">
+            <ComboBox Name="cbxDate" Grid.Row="0" Grid.Column="1" IsEditable="False" SelectionChanged="cbxDate_SelectionChanged" TextBoxBase.TextChanged="cbxDate_OnTextChanged"></ComboBox>
+            <ComboBox Name="txtMajor" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" SelectionChanged="txtMajor_SelectionChanged" >
                 <ComboBoxItem Content="建筑"></ComboBoxItem>
                 <ComboBoxItem Content="结构"></ComboBoxItem>
                 <ComboBoxItem Content="机电"></ComboBoxItem>
             </ComboBox>
-            <ComboBox Name="txtNum" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" IsEditable="True" SelectionChanged="txtNum_SelectionChanged"></ComboBox>
-            <TextBox Name="txtUnit" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"></TextBox>
-            <TextBox Name="txtChangeCost" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"></TextBox>
-            <TextBox Name="txtChangeDate" Grid.Row="2" Grid.Column="4"></TextBox>
-            <TextBox Name="txtChangeContent" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"></TextBox>
+            <ComboBox Name="txtNum" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" IsEditable="False" SelectionChanged="txtNum_SelectionChanged" TextBoxBase.TextChanged="txtNum_OnTextChanged"></ComboBox>
+            <TextBox Name="txtUnit" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2" TextChanged="txtUnit_TextChanged"></TextBox>
+            <TextBox Name="txtChangeCost" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" TextChanged="txtChangeCost_TextChanged"></TextBox>
+            <TextBox Name="txtChangeDate" Grid.Row="2" Grid.Column="4" TextChanged="txtChangeDate_TextChanged"></TextBox>
+            <TextBox Name="txtChangeContent" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextChanged="txtChangeContent_TextChanged"></TextBox>
             <TextBox Name="txtMainSelectEles" Grid.Row="3" Grid.Column="4" IsReadOnly="True" Grid.ColumnSpan="2"></TextBox>
-            <CheckBox Name="CheckBoxSureAdd" HorizontalAlignment="Left" Margin="7,39,0,0" Grid.Row="3" VerticalAlignment="Top" Checked="CheckBoxSureAdd_Checked"/>
+            <CheckBox Name="CheckBoxSureAdd" HorizontalAlignment="Left" Margin="7,39,0,0" Grid.Row="3" VerticalAlignment="Top" Checked="CheckBoxSureAdd_Checked" Visibility="Visible" />
         </Grid>
 
         <Grid Height="70" VerticalAlignment="Bottom">
