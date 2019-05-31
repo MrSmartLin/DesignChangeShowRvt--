@@ -76,6 +76,9 @@ namespace DesignChangeShowRvt
 
             //文本改动保存的复选框隐藏
             CheckBoxSureAdd.Visibility = Visibility.Hidden;
+
+            //日期的DatePicker除了在创建日期时才能使用
+            pickDateCreate.IsEnabled = false;
         }
 
 
@@ -122,7 +125,6 @@ namespace DesignChangeShowRvt
                 btnSelectEles.IsEnabled = false;
                 btnSave.IsEnabled = false;
                 btnSaveAs.IsEnabled = false;
-                pickDateCreate.IsEnabled = false;
                 pickDateChange.IsEnabled = false;
             }
             else
@@ -140,7 +142,6 @@ namespace DesignChangeShowRvt
                 btnSelectEles.IsEnabled = true;
                 btnSave.IsEnabled = true;
                 btnSaveAs.IsEnabled = true;
-                pickDateCreate.IsEnabled = true;
                 pickDateChange.IsEnabled = true;
             }
         }
@@ -152,6 +153,7 @@ namespace DesignChangeShowRvt
 
             cbxDate.IsEnabled = true;
             cbxDate.IsEditable = true;
+            pickDateCreate.IsEnabled = true;
 
             //若没有读取文档
             if (isLoadXmlDoc == 0)
@@ -174,6 +176,9 @@ namespace DesignChangeShowRvt
                 txtChangeDate.Clear();
                 txtChangeContent.Clear();
                 txtMainSelectEles.Clear();
+
+                TaskDialog task=new TaskDialog("新建日期");
+                task.Show();
             }
             
             isNeedNodeDate = 1;
@@ -200,7 +205,6 @@ namespace DesignChangeShowRvt
 
                 IsEditable = 1;
                 ControlEditable();
-
 
                 txtMajor.SelectedIndex = -1;
                 txtNum.SelectedIndex = -1;
@@ -335,7 +339,9 @@ namespace DesignChangeShowRvt
                 cbxDate.SelectedValuePath = "ID";
 
                 cbxDate.IsEnabled = true;
-                pickDateCreate.IsEnabled = true;
+
+                //读取文档的标志位置为1
+                isLoadXmlDoc = 1;
             }
 
 
@@ -504,16 +510,14 @@ namespace DesignChangeShowRvt
                 //同时添加日期和编号节点
                 if (isNeedNodeDate == 1 && isNeedNodeNum == 1)
                 {
+
+                    //不需要建日期与编号的节点
                     isNeedNodeDate = 0;
                     isNeedNodeNum = 0;
-                
-
-                    
 
                     XmlElement thisItemEle = loadDoc.doc.CreateElement(cbxDate.Text);
-                    TaskDialog task = new TaskDialog("添加日期编号");
-                    task.Show();
-                    loadDoc.DCDB.AppendChild(thisItemEle);
+                    loadDoc.DCDB.AppendChild(thisItemEle);                       
+
 
                     XmlElement thisDCJZ = loadDoc.doc.CreateElement("DCJZ");
                     XmlElement thisDCJG = loadDoc.doc.CreateElement("DCJG");
@@ -522,12 +526,10 @@ namespace DesignChangeShowRvt
                     thisItemEle.AppendChild(thisDCJZ);
                     thisItemEle.AppendChild(thisDCJG);
                     thisItemEle.AppendChild(thisDCJD);
-                    
-
-
+                
 
                     XmlElement orders = loadDoc.doc.CreateElement("Order");
-                    loadDoc.DCDB.ChildNodes[txtMajor.SelectedIndex].AppendChild(orders);
+                    loadDoc.DCDB.ChildNodes[loadDoc.DCDB.ChildNodes.Count-1].ChildNodes[txtMajor.SelectedIndex].AppendChild(orders);
                     XmlElement Num = loadDoc.doc.CreateElement("Num");
                     XmlElement Unit = loadDoc.doc.CreateElement("Unit");
                     XmlElement Cost = loadDoc.doc.CreateElement("Cost");
@@ -553,6 +555,50 @@ namespace DesignChangeShowRvt
                     txtNum.IsEditable = false;
 
 
+                    //重新加载日期combobox
+                    List<DateItem> DateItemList = new List<DateItem>();
+                    for (int i = 0; i < loadDoc.DCDates.Count; i++)
+                    {
+                        DateItemList.Add(new DateItem { ID = i, date = loadDoc.DCDates.Item(i).Name });
+                    }
+
+                    cbxDate.ItemsSource = DateItemList;
+                    cbxDate.DisplayMemberPath = "date";
+                    cbxDate.SelectedValuePath = "ID";
+
+
+
+                    //选择当前刚添加的日期和编号
+
+                    int lastlyMajorChoose = txtMajor.SelectedIndex;
+                    cbxDate.SelectedIndex = loadDoc.DCDates.Count - 1;
+                    txtMajor.SelectedIndex = lastlyMajorChoose;
+
+
+                    //重新加载编号combobox
+                    List<NumItem> NumItemList = new List<NumItem>();
+                    loadDoc.Orders = loadDoc.DCDates[cbxDate.SelectedIndex].ChildNodes[txtMajor.SelectedIndex].ChildNodes;
+                    NumItemList.Add(new NumItem { ID = 0, Num = loadDoc.Orders.Item(loadDoc.Orders.Count - 1).FirstChild.InnerText });
+
+                    txtNum.ItemsSource = NumItemList;
+                    txtNum.DisplayMemberPath = "Num";
+                    txtNum.SelectedValuePath = "ID";
+
+                    txtNum.SelectedIndex = 0;
+
+                    //加载单位、金额、日期和内容的文本数据
+                    txtUnit.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[1].InnerText;
+                    txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
+                    txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
+                    txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
+
+                    //隐藏CheckBox
+                    CheckBoxSureAdd.Visibility = Visibility.Hidden;
+
+                    //使日期的DatePicker不可使用
+                    pickDateCreate.IsEnabled = false;
+
+
                 }
 
 
@@ -560,6 +606,7 @@ namespace DesignChangeShowRvt
                 //添加日期节点
                 else if (isNeedNodeDate == 1)
                 {
+                    //不需要建日期的节点
                     isNeedNodeDate = 0;
 
                     XmlElement thisItemEle = loadDoc.doc.CreateElement(cbxDate.Text);
@@ -577,13 +624,41 @@ namespace DesignChangeShowRvt
 
                     //把日期设为不可编辑
                     cbxDate.IsEditable = false;
+
+                    //使日期的DatePicker不可使用
+                    pickDateCreate.IsEnabled = false;
+
+                    //重新加载编号combobox
+                    List<NumItem> NumItemList = new List<NumItem>();
+                    loadDoc.Orders = loadDoc.DCDates[cbxDate.SelectedIndex].ChildNodes[txtMajor.SelectedIndex].ChildNodes;
+
+                    for (int i = 0; i < loadDoc.Orders.Count - 1; i++)
+                    {
+                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders.Item(i).FirstChild.InnerText });
+                    }
+
+
+
+                    txtNum.ItemsSource = NumItemList;
+                    txtNum.DisplayMemberPath = "Num";
+                    txtNum.SelectedValuePath = "ID";
+
+                    txtNum.SelectedIndex = loadDoc.Orders.Count - 1;
+
+                    //加载单位、金额、日期和内容的文本数据
+                    txtUnit.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[1].InnerText;
+                    txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
+                    txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
+                    txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
                 }
 
                 //添加编号节点
                 else if (isNeedNodeNum == 1)
                 {
-                    isNeedNodeNum = 0;
 
+
+                    //不需要再建编号的节点
+                    isNeedNodeNum = 0;
                     XmlElement orders = loadDoc.doc.CreateElement("Order");
                     loadDoc.DCJs[txtMajor.SelectedIndex].AppendChild(orders);
                     XmlElement Num = loadDoc.doc.CreateElement("Num");
@@ -607,6 +682,10 @@ namespace DesignChangeShowRvt
 
                     //把编号设为不可编辑
                     txtNum.IsEditable = false;
+
+
+
+
                 }
 
                 //更新节点内容
