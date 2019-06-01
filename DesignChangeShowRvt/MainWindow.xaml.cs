@@ -412,8 +412,6 @@ namespace DesignChangeShowRvt
                 
                 loadDoc.DateIndex = cbxDate.SelectedIndex;
                 loadDoc.NumIndex = txtMajor.SelectedIndex;
-                TaskDialog task = new TaskDialog("专业"+ txtMajor.SelectedIndex);
-                task.Show();
                 loadDoc.DCJs = loadDoc.DCDates[loadDoc.DateIndex].ChildNodes;
                 loadDoc.Orders = loadDoc.DCJs[loadDoc.NumIndex].ChildNodes;
 
@@ -510,7 +508,8 @@ namespace DesignChangeShowRvt
                 //同时添加日期和编号节点
                 if (isNeedNodeDate == 1 && isNeedNodeNum == 1)
                 {
-
+                    TaskDialog task = new TaskDialog("添加日期编号");
+                    task.Show();
                     //不需要建日期与编号的节点
                     isNeedNodeDate = 0;
                     isNeedNodeNum = 0;
@@ -606,6 +605,9 @@ namespace DesignChangeShowRvt
                 //添加日期节点
                 else if (isNeedNodeDate == 1)
                 {
+                    TaskDialog task = new TaskDialog("添加日期");
+                    task.Show();
+
                     //不需要建日期的节点
                     isNeedNodeDate = 0;
 
@@ -683,6 +685,30 @@ namespace DesignChangeShowRvt
                     //把编号设为不可编辑
                     txtNum.IsEditable = false;
 
+                    //重新加载编号combobox
+                    List<NumItem> NumItemList = new List<NumItem>();
+                    loadDoc.Orders = loadDoc.DCJs[txtMajor.SelectedIndex].ChildNodes;
+
+                    for (int i = 0; i < loadDoc.Orders.Count - 1; i++)
+                    {
+                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders[i].FirstChild.InnerText });
+
+                        TaskDialog task = new TaskDialog(loadDoc.Orders.Item(i).FirstChild.InnerText + "添加编号");
+                        task.Show();
+                    }
+
+
+                    txtNum.ItemsSource = NumItemList;
+                    txtNum.DisplayMemberPath = "Num";
+                    txtNum.SelectedValuePath = "ID";
+
+                    txtNum.SelectedIndex = loadDoc.Orders.Count - 1;
+
+                    //加载单位、金额、日期和内容的文本数据
+                    txtUnit.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[1].InnerText;
+                    txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
+                    txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
+                    txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
 
 
 
