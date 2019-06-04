@@ -35,7 +35,6 @@ namespace DesignChangeShowRvt
 
         //是否已选择了日期和专业的CBX选择
         private int isSelectDate = 0;
-        private int isSelectMajor = 0;
 
         //是否需要因CBX的选择更新数据
         private int forCbxUpdate = 1;
@@ -150,45 +149,57 @@ namespace DesignChangeShowRvt
         //新建日期项 按钮
         private void btnCreateItem_Click(object sender, RoutedEventArgs e)
         {
-
-            cbxDate.IsEnabled = true;
-            cbxDate.IsEditable = true;
-            pickDateCreate.IsEnabled = true;
-
-            //若没有读取文档
-            if (isLoadXmlDoc == 0)
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
             {
-                List<DateItem> dateItems = new List<DateItem>();
-                List<NumItem> numItems=new List<NumItem>();
-
-                loadDoc=new xmlData();
-                isLoadXmlDoc = 1;
-            }
-
-            //若读取了文档
-            else
-            {
-                cbxDate.SelectedIndex=-1;
-                txtMajor.SelectedIndex = -1;
-                txtNum.SelectedIndex = -1;
-                txtUnit.Clear();
-                txtChangeCost.Clear();
-                txtChangeDate.Clear();
-                txtChangeContent.Clear();
-                txtMainSelectEles.Clear();
-
-                TaskDialog task=new TaskDialog("新建日期");
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
                 task.Show();
             }
+
+            else
+            {
+                cbxDate.IsEnabled = true;
+                cbxDate.IsEditable = true;
+                pickDateCreate.IsEnabled = true;
+
+                //若没有读取文档
+                if (isLoadXmlDoc == 0)
+                {
+                    List<DateItem> dateItems = new List<DateItem>();
+                    List<NumItem> numItems=new List<NumItem>();
+
+                    loadDoc=new xmlData();
+                    isLoadXmlDoc = 1;
+                }
+
+                //若读取了文档
+                else
+                {
+                    cbxDate.SelectedIndex=-1;
+                    txtMajor.SelectedIndex = -1;
+                    txtNum.SelectedIndex = -1;
+                    txtUnit.Clear();
+                    txtChangeCost.Clear();
+                    txtChangeDate.Clear();
+                    txtChangeContent.Clear();
+                    txtMainSelectEles.Clear();
+
+                    TaskDialog task=new TaskDialog("新建日期");
+                    task.Show();
+                }
+                
+                isNeedNodeDate = 1;
+                forCbxUpdate = 0;                      
+            }
+          
             
-            isNeedNodeDate = 1;
-            forCbxUpdate = 0;
         }
 
 
         //新建编号项 按钮
         private void btnCreateNumItem_Click(object sender, RoutedEventArgs e)
         {
+
 
             txtNum.IsEditable = true;
 
@@ -220,73 +231,92 @@ namespace DesignChangeShowRvt
             }
 
             forCbxUpdate = 0;
+            
         }
 
 
         //删除编号项 按钮
         private void btnDelItem_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("确定要删除该编号？？？", "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
-                MessageBoxResult.Yes)
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
             {
-                loadDoc.DCJs.Item(txtMajor.SelectedIndex).RemoveChild(loadDoc.Orders.Item(txtNum.SelectedIndex));
-                txtUnit.Clear();
-                txtChangeCost.Clear();
-                txtChangeDate.Clear();
-                txtChangeContent.Clear();
-                txtMainSelectEles.Clear();
-
-                
-
-                List<NumItem> NumItemList = new List<NumItem>();
-
-                for (int i = 0; i < loadDoc.Orders.Count; i++)
-                {
-                    NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders.Item(i).FirstChild.InnerText });
-                }
-
-
-                txtNum.ItemsSource = NumItemList;
-                txtNum.DisplayMemberPath = "Num";
-                txtNum.SelectedValuePath = "ID";               
-
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
             }
+            else
+            {
+                if (MessageBox.Show("确定要删除该编号？？？", "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                    MessageBoxResult.Yes)
+                {
+                    loadDoc.DCJs.Item(txtMajor.SelectedIndex).RemoveChild(loadDoc.Orders.Item(txtNum.SelectedIndex));
+                    txtUnit.Clear();
+                    txtChangeCost.Clear();
+                    txtChangeDate.Clear();
+                    txtChangeContent.Clear();
+                    txtMainSelectEles.Clear();
 
+                    
+
+                    List<NumItem> NumItemList = new List<NumItem>();
+
+                    for (int i = 0; i < loadDoc.Orders.Count; i++)
+                    {
+                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders.Item(i).FirstChild.InnerText });
+                    }
+
+
+                    txtNum.ItemsSource = NumItemList;
+                    txtNum.DisplayMemberPath = "Num";
+                    txtNum.SelectedValuePath = "ID";               
+
+                }                
+            }
         }
 
         //删除日期项 按钮
         private void btnDelDateItem_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("确定要删除该日期？？？", "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
-                MessageBoxResult.Yes)
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
             {
-                
-                loadDoc.DCDB.RemoveChild(loadDoc.DCDates[cbxDate.SelectedIndex]);
-                
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
+            }
 
-                txtUnit.Clear();
-                txtChangeCost.Clear();
-                txtChangeDate.Clear();
-                txtChangeContent.Clear();
-                txtMainSelectEles.Clear();
-
-
-
-                List<DateItem> DateItemList = new List<DateItem>();
-
-                for (int i = 0; i < loadDoc.DCDates.Count; i++)
+            else
+            {
+                if (MessageBox.Show("确定要删除该日期？？？", "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning) ==
+                    MessageBoxResult.Yes)
                 {
-                    DateItemList.Add(new DateItem { ID = i, date = loadDoc.DCDates[i].Name });
-                    TaskDialog taskDialog = new TaskDialog(loadDoc.DCDates[i].Name);
-                    taskDialog.Show();
-                }
+                    
+                    loadDoc.DCDB.RemoveChild(loadDoc.DCDates[cbxDate.SelectedIndex]);
+                    
+
+                    txtUnit.Clear();
+                    txtChangeCost.Clear();
+                    txtChangeDate.Clear();
+                    txtChangeContent.Clear();
+                    txtMainSelectEles.Clear();
 
 
-                cbxDate.ItemsSource = DateItemList;
-                cbxDate.DisplayMemberPath = "date";
-                cbxDate.SelectedValuePath = "ID";
 
-                                
+                    List<DateItem> DateItemList = new List<DateItem>();
+
+                    for (int i = 0; i < loadDoc.DCDates.Count; i++)
+                    {
+                        DateItemList.Add(new DateItem { ID = i, date = loadDoc.DCDates[i].Name });
+                        TaskDialog taskDialog = new TaskDialog(loadDoc.DCDates[i].Name);
+                        taskDialog.Show();
+                    }
+
+
+                    cbxDate.ItemsSource = DateItemList;
+                    cbxDate.DisplayMemberPath = "date";
+                    cbxDate.SelectedValuePath = "ID";
+
+                                    
+                }                
             }
         }
 
@@ -294,70 +324,121 @@ namespace DesignChangeShowRvt
         //从Rvt拾取元素 按钮
         private void btnSelectEles_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
-            IntPtr rvtPtr = Process.GetCurrentProcess().MainWindowHandle;
-            WindowInteropHelper helper = new WindowInteropHelper(page);
-            helper.Owner = rvtPtr;
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
+            {
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
+            }
 
-            page.Show();
+            else
+            {
+                
+                this.Hide();
+                IntPtr rvtPtr = Process.GetCurrentProcess().MainWindowHandle;
+                WindowInteropHelper helper = new WindowInteropHelper(page);
+                helper.Owner = rvtPtr;
+
+                page.Show();
+            }
+
+
         }
 
 
         //读取 按钮按读取键时，把数据加载进去
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
-
-            //弹出读取路径窗口，加载路径
-            OpenFileDialog openDia=new OpenFileDialog();
-            openDia.Filter = "XML文件|*.xml";
-            if (openDia.ShowDialog() == true)
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
             {
-                //清除原来窗口内加载数据
-                cbxDate.Items.Clear();
-                txtMajor.SelectedIndex = -1;
-                txtNum.Items.Clear();
-                txtUnit.Clear();
-                txtChangeCost.Clear();
-                txtChangeDate.Clear();
-                txtChangeContent.Clear();
-                txtMainSelectEles.Clear();
-                xmlData xmldata = new xmlData();
-
-                loadDocPath = openDia.FileName;
-                xmldata.xmlLoad(loadDocPath);
-                loadDoc = xmldata;
-
-                //加载日期combobox
-                List<DateItem> DateItemList=new List<DateItem>();
-                for (int i=0;i<loadDoc.DCDates.Count;i++)
-                {
-                    DateItemList.Add(new DateItem {ID = i,date = loadDoc.DCDates.Item(i).Name});
-                }
-
-                cbxDate.ItemsSource = DateItemList;
-                cbxDate.DisplayMemberPath = "date";
-                cbxDate.SelectedValuePath = "ID";
-
-                cbxDate.IsEnabled = true;
-
-                //读取文档的标志位置为1
-                isLoadXmlDoc = 1;
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
             }
 
+            else
+            {
+                //弹出读取路径窗口，加载路径
+                OpenFileDialog openDia=new OpenFileDialog();
+                openDia.Filter = "XML文件|*.xml";
+                if (openDia.ShowDialog() == true)
+                {
+                    //清除原来窗口内加载数据
+                    cbxDate.Items.Clear();
+                    txtMajor.SelectedIndex = -1;
+                    txtNum.Items.Clear();
+                    txtUnit.Clear();
+                    txtChangeCost.Clear();
+                    txtChangeDate.Clear();
+                    txtChangeContent.Clear();
+                    txtMainSelectEles.Clear();
+                    xmlData xmldata = new xmlData();
 
+                    loadDocPath = openDia.FileName;
+                    xmldata.xmlLoad(loadDocPath);
+                    loadDoc = xmldata;
 
+                    //加载日期combobox
+                    List<DateItem> DateItemList=new List<DateItem>();
+                    for (int i=0;i<loadDoc.DCDates.Count;i++)
+                    {
+                        DateItemList.Add(new DateItem {ID = i,date = loadDoc.DCDates.Item(i).Name});
+                    }
 
-            
+                    cbxDate.ItemsSource = DateItemList;
+                    cbxDate.DisplayMemberPath = "date";
+                    cbxDate.SelectedValuePath = "ID";
+
+                    cbxDate.IsEnabled = true;
+
+                    //读取文档的标志位置为1
+                    isLoadXmlDoc = 1;
+                }                
+            }
+
+           
         }
 
         //保存 按钮时，把数据保存
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            //如果存在文件路径就保存该路径，否则以另存为的方式
-            if (loadDocPath != null)
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
             {
-                loadDoc.saveXMl(loadDocPath);
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
             }
+
+            else
+            {
+                //如果存在文件路径就保存该路径，否则以另存为的方式
+                if (loadDocPath != null)
+                {
+                    loadDoc.saveXMl(loadDocPath);
+                }
+                else
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.DefaultExt = "xml";
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        loadDoc.saveXMl(saveFileDialog.FileName);
+                    }
+                }                
+            }
+
+
+        }
+        //另存为 按钮
+        private void btnSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckBoxSureAdd.Visibility == Visibility.Visible)
+            {
+                TaskDialog task = new TaskDialog("提示");
+                task.MainContent = "请单击复选框确定保存当前修改的内容!!!";
+                task.Show();
+            }
+
             else
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -365,19 +446,8 @@ namespace DesignChangeShowRvt
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     loadDoc.saveXMl(saveFileDialog.FileName);
-                }
+                }                
             }
-        }
-        //另存为 按钮
-        private void btnSaveAs_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.DefaultExt = "xml";
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                loadDoc.saveXMl(saveFileDialog.FileName);
-            }
-
         }
 
 
@@ -398,20 +468,27 @@ namespace DesignChangeShowRvt
             //如果专业和日期cbx都选了选项，更新编号cbx选项
             isSelectDate = 1;
 
+            //控件置为可编辑状态
+            IsEditable = 1;
+            ControlEditable();
 
-
+            
+            CheckBoxSureAdd.Visibility = Visibility.Hidden;
         }
 
         //选择了专业的CBX选项
         private void txtMajor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            isSelectMajor = 1;
-
-            if (isSelectDate == 1 && forCbxUpdate == 1)
+            TaskDialog task = new TaskDialog("专业选择"+ forCbxUpdate);
+            task.Show();
+            if (isSelectDate == 1 && forCbxUpdate == 1&& isNeedNodeNum == 0)
             {
-                
+                txtNum.ItemsSource = null;
+                TaskDialog task1 = new TaskDialog("专业选择" );
+                task1.Show();
                 loadDoc.DateIndex = cbxDate.SelectedIndex;
                 loadDoc.NumIndex = txtMajor.SelectedIndex;
+                loadDoc.DCDates = loadDoc.DCDB.ChildNodes;
                 loadDoc.DCJs = loadDoc.DCDates[loadDoc.DateIndex].ChildNodes;
                 loadDoc.Orders = loadDoc.DCJs[loadDoc.NumIndex].ChildNodes;
 
@@ -438,6 +515,10 @@ namespace DesignChangeShowRvt
                 txtChangeCost.Clear();
                 txtChangeDate.Clear();
                 txtChangeContent.Clear();
+
+
+                //允许添加其它节点的文本
+                isNeedNodeOrders = 1;
             }
         }
 
@@ -451,53 +532,92 @@ namespace DesignChangeShowRvt
                 txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
                 txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
                 txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
+                txtMainSelectEles.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[5].InnerText;
 
+                isNeedNodeOrders = 0;
             }
+
+            CheckBoxSureAdd.Visibility = Visibility.Hidden;
         }
 
         //控件文本有改动时自动弹出checkbox
         private void cbxDate_OnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {           
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
+        {
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
+
         }
 
         private void txtNum_OnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
         }
 
         private void txtUnit_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
-            CheckBoxSureAdd.IsChecked = false;
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
         }
 
         private void txtChangeCost_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
-            CheckBoxSureAdd.IsChecked = false;
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
         }
 
         private void txtChangeDate_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
-            CheckBoxSureAdd.IsChecked = false;
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
         }
 
         private void txtChangeContent_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CheckBoxSureAdd.Visibility = Visibility.Visible;
-            CheckBoxSureAdd.IsChecked = false;
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
+        }
+
+        private void txtMainSelectEles_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CheckBoxSureAdd.Visibility == Visibility.Hidden)
+            {
+                CheckBoxSureAdd.Visibility = Visibility.Visible;
+                CheckBoxSureAdd.IsChecked = false;
+            }
         }
 
 
         //checkbox 确定加入所填的内容
         private void CheckBoxSureAdd_Checked(object sender, RoutedEventArgs e)
         {
+            TaskDialog task1 = new TaskDialog("进入CHECKBOX");
+            task1.Show();
+            //允许combobox更新
+            forCbxUpdate = 1;
+
             if (cbxDate.Text.Length == 0 || txtMajor.Text.Length == 0 || txtNum.Text.Length == 0)
             {
                 TaskDialog taskDialog = new TaskDialog("缺少");
-                taskDialog.MainContent = "日期、专业、编号应该全部选择上。。。。";
+                taskDialog.MainContent = "日期、专业应该全部选择且需要新建编号。。。。";
                 taskDialog.Show();
             }
 
@@ -534,19 +654,22 @@ namespace DesignChangeShowRvt
                     XmlElement Cost = loadDoc.doc.CreateElement("Cost");
                     XmlElement Date = loadDoc.doc.CreateElement("Date");
                     XmlElement Content = loadDoc.doc.CreateElement("Content");
+                    XmlElement ELementsId = loadDoc.doc.CreateElement("ELementsId");
 
-                    
+
                     Num.InnerText = txtNum.Text;
                     Unit.InnerText = txtUnit.Text;
                     Cost.InnerText = txtChangeCost.Text;
                     Date.InnerText = txtChangeDate.Text;
                     Content.InnerText = txtChangeContent.Text;
+                    ELementsId.InnerText = txtMainSelectEles.Text;
 
                     orders.AppendChild(Num);
                     orders.AppendChild(Unit);
                     orders.AppendChild(Cost);
                     orders.AppendChild(Date);
                     orders.AppendChild(Content);
+                    orders.AppendChild(ELementsId);
 
                     //把日期设为不可编辑
                     cbxDate.IsEditable = false;
@@ -590,6 +713,7 @@ namespace DesignChangeShowRvt
                     txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
                     txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
                     txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
+                    txtMainSelectEles.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[5].InnerText;
 
                     //隐藏CheckBox
                     CheckBoxSureAdd.Visibility = Visibility.Hidden;
@@ -630,6 +754,8 @@ namespace DesignChangeShowRvt
                     //使日期的DatePicker不可使用
                     pickDateCreate.IsEnabled = false;
 
+
+
                     //重新加载编号combobox
                     List<NumItem> NumItemList = new List<NumItem>();
                     loadDoc.Orders = loadDoc.DCDates[cbxDate.SelectedIndex].ChildNodes[txtMajor.SelectedIndex].ChildNodes;
@@ -652,6 +778,7 @@ namespace DesignChangeShowRvt
                     txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
                     txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
                     txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
+                    txtMainSelectEles.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[5].InnerText;
                 }
 
                 //添加编号节点
@@ -668,6 +795,7 @@ namespace DesignChangeShowRvt
                     XmlElement Cost = loadDoc.doc.CreateElement("Cost");
                     XmlElement Date = loadDoc.doc.CreateElement("Date");
                     XmlElement Content = loadDoc.doc.CreateElement("Content");
+                    XmlElement ELementsId = loadDoc.doc.CreateElement("ELementsId");
 
 
                     Num.InnerText = txtNum.Text;
@@ -675,13 +803,16 @@ namespace DesignChangeShowRvt
                     Cost.InnerText = txtChangeCost.Text;
                     Date.InnerText = txtChangeDate.Text;
                     Content.InnerText = txtChangeContent.Text;
+                    ELementsId.InnerText = txtChangeContent.Text;
 
                     orders.AppendChild(Num);
                     orders.AppendChild(Unit);
                     orders.AppendChild(Cost);
                     orders.AppendChild(Date);
                     orders.AppendChild(Content);
-
+                    orders.AppendChild(ELementsId);
+                    TaskDialog task = new TaskDialog("添加编号 "+ loadDoc.DCJs[txtMajor.SelectedIndex].ChildNodes.Count);
+                    task.Show();
                     //把编号设为不可编辑
                     txtNum.IsEditable = false;
 
@@ -689,12 +820,9 @@ namespace DesignChangeShowRvt
                     List<NumItem> NumItemList = new List<NumItem>();
                     loadDoc.Orders = loadDoc.DCJs[txtMajor.SelectedIndex].ChildNodes;
 
-                    for (int i = 0; i < loadDoc.Orders.Count - 1; i++)
+                    for (int i = 0; i < loadDoc.Orders.Count ; i++)
                     {
-                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders[i].FirstChild.InnerText });
-
-                        TaskDialog task = new TaskDialog(loadDoc.Orders.Item(i).FirstChild.InnerText + "添加编号");
-                        task.Show();
+                        NumItemList.Add(new NumItem { ID = i, Num = loadDoc.Orders[i].FirstChild.InnerText });                        
                     }
 
 
@@ -709,25 +837,32 @@ namespace DesignChangeShowRvt
                     txtChangeCost.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[2].InnerText;
                     txtChangeDate.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[3].InnerText;
                     txtChangeContent.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[4].InnerText;
-
-
-
+                    txtMainSelectEles.Text = loadDoc.Orders.Item(txtNum.SelectedIndex).ChildNodes[5].InnerText;
                 }
 
                 //更新节点内容
                 else
                 {
+                    TaskDialog task = new TaskDialog("节点内容 ");
+                    task.Show();
                     loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[0].InnerText = txtNum.Text;
                     loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[1].InnerText = txtUnit.Text;
                     loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[2].InnerText = txtChangeCost.Text;
                     loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[3].InnerText = txtChangeDate.Text;
                     loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[4].InnerText = txtChangeContent.Text;
+                    loadDoc.Orders[txtNum.SelectedIndex].ChildNodes[5].InnerText = txtMainSelectEles.Text;
                 }
+
+            
+
             }
 
             CheckBoxSureAdd.IsChecked = false;
 
+
         }
+
+
     }
 
     public class xmlData

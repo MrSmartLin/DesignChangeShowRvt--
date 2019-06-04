@@ -45,7 +45,7 @@
             <TextBox Name="txtChangeCost" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" TextChanged="txtChangeCost_TextChanged"></TextBox>
             <TextBox Name="txtChangeDate" Grid.Row="2" Grid.Column="4" TextChanged="txtChangeDate_TextChanged"></TextBox>
             <TextBox Name="txtChangeContent" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextChanged="txtChangeContent_TextChanged"></TextBox>
-            <TextBox Name="txtMainSelectEles" Grid.Row="3" Grid.Column="4" IsReadOnly="True" Grid.ColumnSpan="2"></TextBox>
+            <TextBox Name="txtMainSelectEles" Grid.Row="3" Grid.Column="4" IsReadOnly="True" Grid.ColumnSpan="2" TextChanged="txtMainSelectEles_TextChanged"></TextBox>
             <CheckBox Name="CheckBoxSureAdd" HorizontalAlignment="Left" Margin="7,39,0,0" Grid.Row="3" VerticalAlignment="Top" Checked="CheckBoxSureAdd_Checked" Visibility="Visible" />
         </Grid>
 
